@@ -1,0 +1,119 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+/// Enum para tipos de conta
+enum AccountType {
+  CHECKING
+  SAVINGS
+  CREDIT
+  OTHER
+}
+
+/// Enum para tipos de transação
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+/// Enum para status de meta
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+/// Usuário do sistema
+model User {
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  name        String?
+  externalId  String?      @unique // Para integrações futuras
+  accounts    Account[]
+  categories  Category[]
+  transactions Transaction[]
+  goals       Goal[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?    // Soft delete
+  // Índice para buscas rápidas por email
+  @@index([email])
+}
+
+/// Conta bancária do usuário
+model Account {
+  id          Int          @id @default(autoincrement())
+  name        String
+  type        AccountType
+  balance     Float        @default(0)
+  user        User         @relation(fields: [userId], references: [id])
+  userId      Int
+  transactions Transaction[]
+  externalId  String?      // Para integrações futuras
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?    // Soft delete
+  @@index([userId])
+}
+
+/// Categoria de transação (ex: alimentação, salário)
+model Category {
+  id          Int          @id @default(autoincrement())
+  name        String
+  type        TransactionType
+  user        User         @relation(fields: [userId], references: [id])
+  userId      Int
+  transactions Transaction[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?    // Soft delete
+  @@unique([name, userId, type]) // Evita duplicidade de categorias por usuário/tipo
+  @@index([userId])
+}
+
+/// Transação financeira
+model Transaction {
+  id          Int          @id @default(autoincrement())
+  amount      Float
+  date        DateTime
+  description String?
+  type        TransactionType
+  user        User         @relation(fields: [userId], references: [id])
+  userId      Int
+  account     Account      @relation(fields: [accountId], references: [id])
+  accountId   Int
+  category    Category     @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  externalId  String?      // Para integrações futuras
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?    // Soft delete
+  @@index([userId, date])
+  @@index([accountId])
+  @@index([categoryId])
+}
+
+/// Meta financeira do usuário
+model Goal {
+  id          Int          @id @default(autoincrement())
+  name        String
+  target      Float
+  deadline    DateTime
+  status      GoalStatus   @default(ACTIVE)
+  user        User         @relation(fields: [userId], references: [id])
+  userId      Int
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?    // Soft delete
+  @@index([userId])
+}
+

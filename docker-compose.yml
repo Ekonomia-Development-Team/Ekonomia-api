@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: ekonomiadev
+      POSTGRES_PASSWORD: ekonomiadev
+      POSTGRES_DB: ekonomiadev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build: .
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgres://ekonomiadev:ekonomiadev@db:5432/ekonomiadev
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run start:dev
+
+volumes:
+  pgdata:
