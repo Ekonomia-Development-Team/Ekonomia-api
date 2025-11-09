@@ -37,6 +37,7 @@ model User {
   id          Int          @id @default(autoincrement())
   email       String       @unique
   name        String?
+  password    String?
   externalId  String?      @unique // Para integrações futuras
   accounts    Account[]
   categories  Category[]
