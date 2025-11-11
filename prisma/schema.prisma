@@ -2,7 +2,7 @@
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
-  previewFeatures = []
+  binaryTargets = ["native"]
 }
 
 datasource db {
