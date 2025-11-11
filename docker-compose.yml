@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   db:
     image: postgres:16
@@ -17,7 +16,7 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgres://ekonomiadev:ekonomiadev@db:5432/ekonomiadev
+      DATABASE_URL: postgresql://ekonomiadev:ekonomiadev@db:5432/ekonomiadev
       NODE_ENV: development
     ports:
       - "3000:3000"

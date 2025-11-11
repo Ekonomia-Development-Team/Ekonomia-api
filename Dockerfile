@@ -10,6 +10,9 @@ COPY . .
 
 RUN npm run build
 
+# Generate Prisma Client
+RUN npx prisma generate
+
 EXPOSE 3000
 
-CMD [ "npm" , "start:prod" , "run" ]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start:prod"]
